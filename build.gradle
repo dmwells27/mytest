@@ -62,7 +62,7 @@ task pom {
         project {
           version jar.version
         }
-    }.writeTo("$buildDir/libs/$project.name-${jar.version}.pom")
+    }.writeTo("$buildDir/libs/$jar.baseName-${jar.version}.pom")
 }
 
 pom.dependsOn jar
