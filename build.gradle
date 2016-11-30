@@ -1,0 +1,107 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath("org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.0.1")
+		classpath ("org.jfrog.buildinfo:build-info-extractor-gradle:4.0.0")
+    }
+}
+
+plugins {
+    id 'net.researchgate.release' version '2.3.4'
+}
+
+apply plugin: 'java'
+apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
+ext.artifactory_username = project.hasProperty('artifactory_username') ? project.getProperty('artifactory_username') : 'none'
+ext.artifactory_password = project.hasProperty('artifactory_password') ? project.getProperty('artifactory_password') : 'none'
+
+
+jar {
+    baseName = '<<<<<your jar name>>>>>'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+group = 'Delivery'
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+    baseName jar.baseName
+	version jar.version
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+release {
+    preTagCommitMessage = '[Release]: '
+  	tagCommitMessage = '[Release]: creating tag '
+  	newVersionCommitMessage = '[Release]: new snapshot version '
+  	tagTemplate = 'v${version}'
+  	git {
+        requireBranch = 'master'
+        pushToRemote = 'origin'
+    }
+}
+
+task pom {
+    pom {
+        project {
+          version jar.version
+        }
+    }.writeTo("$buildDir/libs/$project.name-${jar.version}.pom")
+}
+
+pom.dependsOn jar
+pom.dependsOn sourcesJar
+pom.dependsOn test
+
+artifactory {
+    contextUrl = 'https://maven.artifactory.homedepot.com/artifactory' // base artifactory url
+    publish {
+        repository {
+          repoKey = 'libs-release-local'		//The Artifactory repository key to publish to
+          username = artifactory_username	  	//The publisher user name
+          password = artifactory_password		//The publisher password
+          maven = true
+    	}
+    	defaults {
+            // Reference to Gradle publications defined in the build script.
+            // This is how we tell the Artifactory Plugin which artifacts should be
+            // published to Artifactory.
+            publications('mavenJava')
+            publishArtifacts = true
+            // Properties to be attached to the published artifacts.
+            properties = ['qa.level': 'basic', 'dev.team' : 'core']
+            // Publish generated POM files to Artifactory (true by default)
+            publishPom = true
+        }
+  	}
+}
+
+artifactoryPublish { 
+    dependsOn jar
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourceJar {
+                classifier "sources"
+            }
+        }
+    }
+}

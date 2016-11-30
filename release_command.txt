@@ -1,0 +1,2 @@
+# this is an example of how to release from your worksation
+gradle release -Prelease.useAutomaticVersion=true artifactoryPublish -Partifactory_username=<your LDAP username> -Partifactory_password=<your LDAP password>
