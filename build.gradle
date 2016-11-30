@@ -23,7 +23,7 @@ ext.artifactory_password = project.hasProperty('artifactory_password') ? project
 
 
 jar {
-    baseName = '<<<<<your jar name>>>>>'
+    baseName = 'dwtest'
 }
 
 sourceCompatibility = 1.8
@@ -87,7 +87,7 @@ artifactory {
   	}
 }
 
-artifactoryPublish { 
+artifactoryPublish {
     dependsOn jar
 }
 
