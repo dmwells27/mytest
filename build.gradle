@@ -46,6 +46,11 @@ release {
   	tagCommitMessage = '[Release]: creating tag '
   	newVersionCommitMessage = '[Release]: new snapshot version '
   	tagTemplate = 'v${version}'
+    failOnCommitNeeded =	false
+    failOnPublishNeeded	= false
+    failOnSnapshotDependencies =	false
+    failOnUnversionedFiles	= false
+    failOnUpdateNeeded = false
   	git {
         requireBranch = 'master'
         pushToRemote = 'origin'
